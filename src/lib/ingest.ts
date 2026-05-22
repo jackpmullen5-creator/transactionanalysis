@@ -71,6 +71,9 @@ export function parseRow(
     "match info",
     "matchedterm",
     "flagged term",
+    "flagged transaction element",
+    "transaction element",
+    "flagged element",
     "transaction match",
   );
   const ofacEntity = pick(
@@ -78,6 +81,10 @@ export function parseRow(
     "ofac entity",
     "ofacentity",
     "matched entity",
+    "ofac list match",
+    "list match",
+    "ofac match",
+    "sanctioned entity",
     "entity",
     "watchlist entity",
   );

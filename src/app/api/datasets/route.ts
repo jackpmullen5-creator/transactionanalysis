@@ -49,8 +49,14 @@ export async function POST(req: Request) {
   });
 
   if (rows.length === 0) {
+    const detected = Object.keys(records[0] ?? {});
     return NextResponse.json(
-      { error: "No valid rows found.", errors },
+      {
+        error:
+          "No valid rows found. The file needs columns for the alert number, the flagged transaction text, and the matched OFAC entity. " +
+          `Columns detected: ${detected.join(", ") || "(none)"}.`,
+        errors,
+      },
       { status: 400 },
     );
   }

@@ -2,8 +2,14 @@
 // ("") and both \n and \r\n line endings. Returns an array of row objects keyed
 // by the (lowercased, trimmed) header names.
 
+function stripBom(text: string): string {
+  return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
+}
+
 export function parseCsv(text: string): Record<string, string>[] {
-  const rows = parseRows(text);
+  // Strip a UTF-8 byte-order mark (common in Excel exports) so it doesn't
+  // corrupt the first header name.
+  const rows = parseRows(stripBom(text));
   if (rows.length === 0) return [];
 
   const headers = rows[0].map((h) => h.trim().toLowerCase());
