@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// NOTE: SQLite does not support Prisma enums. The following fields are stored
+// as strings; their allowed values (the union types) are defined and enforced
+// in src/lib/types.ts.
+//   Role:           ADMIN | ANALYST
+//   CaseStatus:     AI_REVIEWED | PENDING_APPROVAL | FLAGGED | HUMAN_CLEARED
+//   Disposition:    FP_SINGLE_WORD | FP_SINGLE_WORD_VESSEL | FP_TWO_WORDS |
+//                   FP_FULL_NAME_MISMATCH | MASS_CLOSE
+//   OfacEntityType: INDIVIDUAL | ENTITY | VESSEL | AIRCRAFT | UNKNOWN
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         String   @default("ANALYST")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  uploadedDatasets Dataset[]
+  decisions        DecisionLog[]
+  decidedCases     Transaction[] @relation("DecidedBy")
+}
+
+model Dataset {
+  id           String   @id @default(cuid())
+  filename     String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String     @id @default(cuid())
+  alertNumber String
+  dateCreated DateTime
+  dueDate     DateTime
+  watchlist   String     @default("OFAC")
+  subjectType String     @default("Transaction")
+
+  // Match Info
+  matchedTerm    String  // part of our transaction that was flagged
+  ofacEntity     String  // entity on the OFAC list that matched it
+  ofacEntityType String  @default("UNKNOWN")
+
+  // Normalized dedupe key: normalize(matchedTerm)|normalize(ofacEntity)
+  matchKey String
+
+  status      String  @default("FLAGGED")
+  disposition String?
+  // Final rendered text (with XXXX filled), shown to compliance team.
+  dispositionText String?
+  // How/why the decision was reached.
+  reasoning   String?
+
+  // Who resolved it (null while open or if AI-cleared).
+  decidedBy   User?     @relation("DecidedBy", fields: [decidedById], references: [id])
+  decidedById String?
+  decidedAt   DateTime?
+
+  dataset   Dataset @relation(fields: [datasetId], references: [id], onDelete: Cascade)
+  datasetId String
+
+  createdAt DateTime @default(now())
+
+  logs DecisionLog[]
+
+  @@index([matchKey])
+  @@index([status])
+}
+
+model DecisionLog {
+  id              String       @id @default(cuid())
+  transaction     Transaction  @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transactionId   String
+  // Null actor = automated AI action.
+  actor           User?        @relation(fields: [actorId], references: [id])
+  actorId         String?
+  action          String   // AI_AUTO_CLEAR | AI_PROPOSE | AI_FLAG | HUMAN_APPROVE | HUMAN_OVERRIDE | HUMAN_FLAG | MASS_CLOSE
+  disposition     String?
+  dispositionText String?
+  reasoning       String?
+  createdAt       DateTime     @default(now())
+}

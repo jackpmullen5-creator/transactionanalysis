@@ -1,0 +1,23 @@
+node_modules
+.next
+out
+build
+*.log
+npm-debug.log*
+
+# env
+.env
+.env.local
+
+# database
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# os
+.DS_Store
+
+# ts
+next-env.d.ts
+*.tsbuildinfo
