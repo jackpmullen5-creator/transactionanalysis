@@ -60,39 +60,44 @@ export default function UploadForm() {
   return (
     <div className="grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
       <div className="card">
-        <h2 style={{ marginTop: 0 }}>Upload a CSV</h2>
+        <h2 style={{ marginTop: 0 }}>Upload a PDF</h2>
         {error && <div className="error">{error}</div>}
-        <label>CSV file</label>
+        <label>OFAC alert PDF</label>
         <input
           type="file"
-          accept=".csv,text/csv"
+          accept="application/pdf,.pdf"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
         <div className="row" style={{ marginTop: 14 }}>
           <button className="btn" disabled={!file || busy} onClick={upload}>
-            {busy ? "Processing…" : "Upload & analyze"}
+            {busy ? "Reading & analyzing…" : "Upload & analyze"}
           </button>
           <button
             className="btn secondary"
             disabled={busy}
             onClick={loadSample}
-            title="Generate and ingest a built-in sample dataset"
+            title="Load a built-in sample dataset for a quick demo"
           >
             Load sample data
           </button>
         </div>
+        {busy && (
+          <p className="muted" style={{ marginTop: 10 }}>
+            Reading the document and extracting each alert — this can take a
+            little while for large batches.
+          </p>
+        )}
 
         {summary && (
           <div className="success-box" style={{ marginTop: 16 }}>
-            <strong>Processed {summary.total} cases.</strong>
+            <strong>Processed {summary.total} alerts.</strong>
             <div style={{ marginTop: 6 }}>
               {summary.aiReviewed} AI reviewed · {summary.pendingApproval}{" "}
               pending approval · {summary.flagged} flagged
             </div>
             {summary.errors.length > 0 && (
               <div style={{ marginTop: 6 }}>
-                {summary.errors.length} row(s) skipped (e.g. line{" "}
-                {summary.errors[0].line}: {summary.errors[0].message})
+                {summary.errors.length} record(s) skipped.
               </div>
             )}
             <div style={{ marginTop: 8 }}>
@@ -105,35 +110,29 @@ export default function UploadForm() {
       </div>
 
       <div className="card">
-        <h2 style={{ marginTop: 0 }}>Expected format</h2>
+        <h2 style={{ marginTop: 0 }}>How it works</h2>
         <p className="muted">
-          A header row plus one row per alert. Columns (case-insensitive):
+          Drop in a PDF of flagged transactions — a daily batch, an export, or a
+          screening report. There is no required format or column layout.
         </p>
         <ul className="muted" style={{ paddingLeft: 18 }}>
           <li>
-            <strong>Alert Number</strong> — 5-digit alert id
+            The app reads the document and identifies every individual alert.
           </li>
           <li>
-            <strong>Date Created</strong> — e.g. 2026-05-01 (due date defaults to
-            +1 month)
+            For each one it pulls out the alert number, dates, the flagged
+            transaction text, and the matched OFAC entity.
           </li>
           <li>
-            <strong>Matched Term</strong> — the flagged part of the transaction
-          </li>
-          <li>
-            <strong>OFAC Entity</strong> — the matched watchlist entity
-          </li>
-          <li>
-            <strong>OFAC Entity Type</strong> — optional (VESSEL / INDIVIDUAL /
-            ENTITY) — drives the vessel disposition
+            Each alert is then auto-bucketed into <strong>AI Reviewed</strong>,{" "}
+            <strong>Pending Approval</strong>, or{" "}
+            <strong>Flagged for Human Review</strong>.
           </li>
         </ul>
         <p className="muted">
-          Watchlist defaults to OFAC and Subject Type to Transaction if omitted.
+          Extraction is best-effort on messy documents — review the buckets and
+          adjust any case as needed.
         </p>
-        <a className="btn secondary small" href="/api/datasets/sample">
-          Download CSV template
-        </a>
       </div>
     </div>
   );

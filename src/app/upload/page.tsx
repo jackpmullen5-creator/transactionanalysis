@@ -13,10 +13,10 @@ export default async function UploadPage() {
     <>
       <Nav user={user} />
       <div className="container">
-        <h1>Upload OFAC alert dataset</h1>
+        <h1>Upload OFAC alert PDF</h1>
         <p className="subtitle">
-          Upload a CSV of flagged transactions. Each row is analyzed and bucketed
-          automatically.
+          Upload a PDF of flagged transactions. The app reads each alert and
+          buckets it automatically — no fixed format required.
         </p>
         <UploadForm />
       </div>
