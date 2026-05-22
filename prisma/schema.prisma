@@ -3,8 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // Pooled connection for app queries (serverless-friendly).
+  url       = env("DATABASE_URL")
+  // Direct connection for schema push/migrations. Vercel's Postgres/Neon
+  // integration sets both of these automatically.
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 // These enum-like fields are stored as plain strings; their allowed values
