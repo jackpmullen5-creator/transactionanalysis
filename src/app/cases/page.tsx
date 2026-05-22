@@ -35,9 +35,9 @@ export default async function CasesPage({
   if (dataset) where.datasetId = dataset;
   if (q) {
     where.OR = [
-      { alertNumber: { contains: q } },
-      { matchedTerm: { contains: q } },
-      { ofacEntity: { contains: q } },
+      { alertNumber: { contains: q, mode: "insensitive" } },
+      { matchedTerm: { contains: q, mode: "insensitive" } },
+      { ofacEntity: { contains: q, mode: "insensitive" } },
     ];
   }
 

@@ -3,13 +3,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// NOTE: SQLite does not support Prisma enums. The following fields are stored
-// as strings; their allowed values (the union types) are defined and enforced
-// in src/lib/types.ts.
+// These enum-like fields are stored as plain strings; their allowed values
+// (the union types) are defined and enforced in src/lib/types.ts.
 //   Role:           ADMIN | ANALYST
 //   CaseStatus:     AI_REVIEWED | PENDING_APPROVAL | FLAGGED | HUMAN_CLEARED
 //   Disposition:    FP_SINGLE_WORD | FP_SINGLE_WORD_VESSEL | FP_TWO_WORDS |
